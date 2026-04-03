@@ -1,0 +1,33 @@
+name: Build Xinar
+on:
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: npm install
+
+      - name: Package
+        run: |
+          mkdir -p dist
+          cp -r meshcentral.js agents views public district catch dist/
+          cp package.json dist/
+          cd dist && npm install --production
+          cd .. && tar -czf xinar.tar.gz dist/
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: xinar
+          path: xinar.tar.gz
